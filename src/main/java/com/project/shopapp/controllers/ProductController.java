@@ -1,8 +1,7 @@
-package com.example.shopapp.controllers;
+package com.project.shopapp.controllers;
 
 
-import com.example.shopapp.dtos.ProductDTO;
-import jakarta.validation.Path;
+import com.project.shopapp.dtos.ProductDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,8 +32,12 @@ public class ProductController {
                 List<String> errorMessages = result.getFieldErrors().stream().map(fieldError -> fieldError.getDefaultMessage()).toList();
                 return ResponseEntity.badRequest().body(errorMessages);
             }
-            MultipartFile file = productDTO.getFile();
-            if (file != null) {
+            List<MultipartFile> files = productDTO.getImages();
+            files = files == null ? new ArrayList<MultipartFile>() : files;
+            for (MultipartFile file : files) {
+                if (file.getSize() == 0){
+                    continue;
+                }
                 if (file.getSize() > 10*1024*1024){
                     return ResponseEntity.badRequest().body("File is too big");
                 }
@@ -44,7 +48,6 @@ public class ProductController {
                 // Luu va cap nhat thumbnail trong DTO
                 String fileName = storeFile(file);
             }
-
             return ResponseEntity.ok("Product created successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
