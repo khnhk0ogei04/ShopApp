@@ -1,5 +1,6 @@
 package com.project.shopapp.controllers;
 
+import com.github.javafaker.Faker;
 import com.project.shopapp.dtos.*;
 import com.project.shopapp.models.Product;
 import com.project.shopapp.models.ProductImage;
@@ -142,13 +143,59 @@ public class ProductController {
     }
     //http://localhost:8088/api/v1/products/6
     @GetMapping("/{id}")
-    public ResponseEntity<String> getProductById(
-            @PathVariable("id") String productId
+    public ResponseEntity<?> getProductById(
+            @PathVariable("id") Long productId
     ) {
-        return ResponseEntity.ok("Product with ID: " + productId);
+        try {
+            Product existingProduct = productService.getProductById(productId);
+            return ResponseEntity.ok(ProductResponse.fromProduct(existingProduct));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable long id) {
-        return ResponseEntity.ok(String.format("Product with id = %d deleted successfully", id));
+    public ResponseEntity<?> deleteProduct(@PathVariable long id) {
+        try {
+            productService.deleteProduct(id);
+            return ResponseEntity.ok(String.format("Product %s deleted", id));
+        } catch (Exception ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("/generateFakeProducts")
+    public ResponseEntity<String> generateFakeProducts(){
+        Faker faker = new Faker();
+        for (int i = 0; i < 10000; i++){
+            String productName = faker.commerce().productName();
+            if (productService.existsByName(productName)){
+                continue;
+            }
+            ProductDTO productDTO = ProductDTO.builder()
+                    .name(productName)
+                    .price((float)faker.number().numberBetween(10, 90000))
+                    .description(faker.lorem().sentence())
+                    .thumbnail("")
+                    .categoryId((long)faker.number().numberBetween(7, 9))
+                    .build();
+            try{
+                productService.createProduct(productDTO);
+            } catch (Exception e){
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
+        }
+        return ResponseEntity.ok("Fake Products created successfully");
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateProduct(
+            @PathVariable long id,
+            @RequestBody ProductDTO productDTO
+    ){
+        try{
+            Product updateProduct = productService.updateProduct(id, productDTO);
+            return ResponseEntity.ok(String.format("Product %s updated", id));
+        } catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

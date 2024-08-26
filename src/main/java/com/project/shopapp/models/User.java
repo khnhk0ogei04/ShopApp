@@ -1,6 +1,7 @@
 package com.project.shopapp.models;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,7 @@ public class User extends BaseEntity{
     @Column(name = "password", length = 200)
     private String password;
 
+    @Column(name="is_active")
     private Boolean active;
 
     @Column(name = "date_of_birth")

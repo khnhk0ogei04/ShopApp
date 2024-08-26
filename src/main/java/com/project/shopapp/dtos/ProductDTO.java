@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 public class ProductDTO {
     @NotBlank(message="Title is required")
     @Size(min = 3, max = 200, message="title must be between 3 and 200 characters")
