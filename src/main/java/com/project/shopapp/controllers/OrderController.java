@@ -37,22 +37,39 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/{user_id}")
-    public ResponseEntity<?> getOrders(@Valid @PathVariable long user_id) {
+    @GetMapping("/user/{user_id}")
+    public ResponseEntity<?> getOrders(@Valid @PathVariable("user_id") long user_id) {
         try {
-            return ResponseEntity.ok().body("Lay ra danh sach order tu user_id: " + user_id);
+            List<Order> orders = orderService.findByUserId(user_id);
+            return ResponseEntity.ok().body(orders);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getOrder(@Valid @PathVariable("id") Long orderId){
+        try {
+            Order existingOrder = orderService.getOrder(orderId);
+            return ResponseEntity.ok().body(existingOrder);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
     @PutMapping("/{id}")
     public ResponseEntity<?> updateOrder(@Valid @PathVariable long id, @RequestBody @Valid OrderDTO orderDTO){
-        return ResponseEntity.ok().body("Cap nhat thanh cong 1 order");
+        System.out.println(id);
+        try {
+            Order order = orderService.updateOrder(id, orderDTO);
+            return ResponseEntity.ok().body(order);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error happened");
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteOrder(@Valid @PathVariable long id) {
-        return ResponseEntity.ok().body("Xoa thanh cong 1 order");
+    public ResponseEntity<?> deleteOrder(@Valid @PathVariable("id") long id) {
+        orderService.deleteOrder(id);
+        return ResponseEntity.ok().body("Order deleted successfully");
     }
 }
