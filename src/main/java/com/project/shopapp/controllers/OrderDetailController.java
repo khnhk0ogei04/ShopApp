@@ -4,6 +4,7 @@ import com.project.shopapp.dtos.OrderDetailDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
 import com.project.shopapp.models.OrderDetail;
 import com.project.shopapp.repositories.OrderDetailRepository;
+import com.project.shopapp.responses.OrderDetailResponse;
 import com.project.shopapp.services.OrderDetailService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,28 +24,43 @@ public class OrderDetailController {
 
     @PostMapping
     public ResponseEntity<?> createOrderDetail (
-            @Valid @RequestBody OrderDetailDTO newOrderDetail
+            @Valid @RequestBody OrderDetailDTO orderDetailDTO
     ){
-        return ResponseEntity.ok(newOrderDetail);
+        try {
+            OrderDetail newOrderDetail = orderDetailService.createOrderDetail(orderDetailDTO);
+            return ResponseEntity.ok(OrderDetailResponse.fromOrderDetail(newOrderDetail));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrderDetail (@Valid @PathVariable("id") long id) throws DataNotFoundException {
         OrderDetail orderDetail = orderDetailService.getOrderDetail(id);
-        return ResponseEntity.ok().body(orderDetail);
+        return ResponseEntity.ok().body(OrderDetailResponse.fromOrderDetail(orderDetail));
+//        return ResponseEntity.ok().body(orderDetail);
     }
     // Lay ra danh sach cac order_details cua 1 order nao do:
     @GetMapping("/order/{orderId}")
     public ResponseEntity<?> getOrderDetails(@Valid @PathVariable("orderId") long orderId) {
         List<OrderDetail> orderDetails = orderDetailService.findByOrderId(orderId);
-        return ResponseEntity.ok("getOrderDetails with orderId " + orderId);
+        List<OrderDetailResponse> orderDetailResponses = orderDetails
+                .stream()
+                .map(orderDetail -> OrderDetailResponse.fromOrderDetail(orderDetail))
+                .toList();
+       return ResponseEntity.ok(orderDetailResponses);
     }
     // Sua doi 1 cai orderDetails nao do
     @PutMapping("/{id}")
     public ResponseEntity<?> updateOrderDetail (
             @Valid @PathVariable("id") long id,
-            @RequestBody OrderDetailDTO newOrderDetailData
+            @RequestBody OrderDetailDTO orderDetailDTO
     ){
-        return ResponseEntity.ok("Update OrderDetail with Id " + id + " to " + newOrderDetailData);
+        try {
+            OrderDetail orderDetail = orderDetailService.updateOrderDetail(id, orderDetailDTO);
+            return ResponseEntity.ok().body(OrderDetailResponse.fromOrderDetail(orderDetail));
+        } catch (Exception ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
     }
 
     // Xoa 1 chi tiet don hang
@@ -52,6 +68,7 @@ public class OrderDetailController {
     public ResponseEntity<?> deleteOrderDetail (
             @Valid @PathVariable("id") long id
     ){
+        orderDetailService.deleteOrderDetail(id);
         return ResponseEntity.noContent().build();
     }
 }

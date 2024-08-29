@@ -24,13 +24,13 @@ public class OrderDetail {
     private Product product;
 
     @Column(name="price", nullable = false)
-    private float price;
+    private Float price;
 
     @Column(name="number_of_products", nullable = false)
     private int numberOfProducts;
 
     @Column(name="total_money", nullable = false)
-    private int totalMoney;
+    private Float totalMoney;
 
     private String color;
 }

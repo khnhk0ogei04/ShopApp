@@ -21,7 +21,7 @@ public class OrderDetailDTO {
     private long productId;
 
     @Min(value=0, message = "Price must be >= 0")
-    private long price;
+    private Float price;
 
     @Min(value=1, message = "Nums of products must be >= 1")
     @JsonProperty("number_of_products")
@@ -29,7 +29,7 @@ public class OrderDetailDTO {
 
     @Min(value=0, message = "Total price must be >= 0")
     @JsonProperty("total_money")
-    private int totalMoney;
+    private Float totalMoney;
 
     private String color;
 }
